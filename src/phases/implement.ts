@@ -42,7 +42,7 @@ export async function implement(projectPath: string, opts: { model?: string }): 
     systemPrompt: implementSystem(detect),
     prompt: implementUser(),
     allowedTools: ["Read", "Grep", "Glob", "Edit", "Write", "Bash", toolNames.excelRead],
-    permissionMode: "acceptEdits",
+    permissionMode: "bypassPermissions",
     model: cfg.model,
     resume: session.sessionId,
     mcpServers,

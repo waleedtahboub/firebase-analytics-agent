@@ -31,7 +31,7 @@ export async function ask(
     systemPrompt: askSystem(detect),
     prompt: question,
     allowedTools: ["Read", "Grep", "Glob", toolNames.excelRead],
-    permissionMode: "acceptEdits",
+    permissionMode: "bypassPermissions",
     model: cfg.model,
     resume: session.sessionId,
     mcpServers,

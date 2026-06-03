@@ -29,7 +29,7 @@ export async function plan(projectPath: string, opts: { model?: string }): Promi
     systemPrompt: planSystem(detect),
     prompt: planUser(),
     allowedTools: ["Read", "Grep", "Glob", "Write", toolNames.excelRead],
-    permissionMode: "acceptEdits",
+    permissionMode: "bypassPermissions",
     model: cfg.model,
     resume: session.sessionId,
     mcpServers,

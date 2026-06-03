@@ -34,7 +34,7 @@ export async function analyze(
     systemPrompt: analyzeSystem(detect),
     prompt: analyzeUser(detect.projectPath, opts.figma),
     allowedTools: ["Read", "Grep", "Glob", toolNames.figma, toolNames.excelWrite],
-    permissionMode: "acceptEdits",
+    permissionMode: "bypassPermissions",
     model: cfg.model,
     mcpServers,
     phase: "analyzed",

@@ -14,6 +14,17 @@ export type PermissionMode =
   | "bypassPermissions"
   | "plan";
 
+/**
+ * Phases that use custom MCP tools (excel_write, excel_read, figma) need
+ * "bypassPermissions" — the SDK's default blocks in-process MCP tool calls.
+ * Read-only / write-only phases that only use built-in tools use "acceptEdits".
+ */
+export function permissionModeFor(hasMcpTools: boolean, readOnly: boolean): PermissionMode {
+  if (hasMcpTools) return "bypassPermissions";
+  if (readOnly) return "plan";
+  return "acceptEdits";
+}
+
 export interface RunPhaseOptions {
   projectPath: string;
   prompt: string;
