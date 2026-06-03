@@ -1,7 +1,7 @@
 import { detectFlutter } from "../flutter/detect.js";
 import { promoteProdSystem, promoteProdUser } from "../prompts/index.js";
 import { runPhase } from "../agent.js";
-import { getConfig, requireApiKey } from "../config.js";
+import { getConfig, requireClaudeCli } from "../config.js";
 import { loadSession, saveSession } from "../session.js";
 import { ensureBranch, diffStat } from "../lib/git.js";
 import { ANALYTICS_BRANCH } from "./firebase.js";
@@ -11,7 +11,7 @@ export async function promoteProd(
   opts: { prodProject?: string; model?: string }
 ): Promise<void> {
   const cfg = getConfig(opts.model);
-  requireApiKey(cfg);
+  requireClaudeCli();
 
   if (!opts.prodProject) {
     console.error("Provide the prod Firebase project id:  fa promote-prod --prod-project <id>");

@@ -3,14 +3,14 @@ import { detectFlutter } from "../flutter/detect.js";
 import { createAnalyticsTools } from "../tools/index.js";
 import { implementSystem, implementUser } from "../prompts/index.js";
 import { runPhase } from "../agent.js";
-import { getConfig, requireApiKey } from "../config.js";
+import { getConfig, requireClaudeCli } from "../config.js";
 import { loadSession, saveSession, statePaths } from "../session.js";
 import { ensureBranch, diffStat } from "../lib/git.js";
 import { ANALYTICS_BRANCH } from "./firebase.js";
 
 export async function implement(projectPath: string, opts: { model?: string }): Promise<void> {
   const cfg = getConfig(opts.model);
-  requireApiKey(cfg);
+  requireClaudeCli();
 
   const paths = statePaths(projectPath);
   if (!existsSync(paths.trackingXlsx)) {

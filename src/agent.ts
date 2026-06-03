@@ -1,5 +1,8 @@
 // Thin wrapper around the Claude Agent SDK's query() that every phase shares:
 // streams output to the console + run.log, captures the session id, and persists state.
+//
+// Auth: the SDK shells out to the `claude` CLI — uses your Claude Code login,
+// NOT a raw ANTHROPIC_API_KEY.
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { appendFileSync } from "node:fs";
 import { ensureStateDir, statePaths, saveSession } from "./session.js";

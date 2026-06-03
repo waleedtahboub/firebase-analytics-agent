@@ -3,12 +3,12 @@ import { detectFlutter } from "../flutter/detect.js";
 import { createAnalyticsTools } from "../tools/index.js";
 import { planSystem, planUser } from "../prompts/index.js";
 import { runPhase } from "../agent.js";
-import { getConfig, requireApiKey } from "../config.js";
+import { getConfig, requireClaudeCli } from "../config.js";
 import { loadSession, statePaths } from "../session.js";
 
 export async function plan(projectPath: string, opts: { model?: string }): Promise<void> {
   const cfg = getConfig(opts.model);
-  requireApiKey(cfg);
+  requireClaudeCli();
 
   const paths = statePaths(projectPath);
   if (!existsSync(paths.trackingXlsx)) {

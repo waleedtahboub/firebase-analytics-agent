@@ -2,7 +2,7 @@ import { detectFlutter } from "../flutter/detect.js";
 import { createAnalyticsTools } from "../tools/index.js";
 import { askSystem } from "../prompts/index.js";
 import { runPhase } from "../agent.js";
-import { getConfig, requireApiKey } from "../config.js";
+import { getConfig, requireClaudeCli } from "../config.js";
 import { loadSession } from "../session.js";
 
 export async function ask(
@@ -11,7 +11,7 @@ export async function ask(
   opts: { model?: string }
 ): Promise<void> {
   const cfg = getConfig(opts.model);
-  requireApiKey(cfg);
+  requireClaudeCli();
 
   const session = loadSession(projectPath);
   if (!session.sessionId) {

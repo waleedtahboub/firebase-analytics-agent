@@ -1,7 +1,7 @@
 import { detectFlutter } from "../flutter/detect.js";
 import { firebaseSystem, firebaseUser } from "../prompts/index.js";
 import { runPhase } from "../agent.js";
-import { getConfig, requireApiKey } from "../config.js";
+import { getConfig, requireClaudeCli } from "../config.js";
 import { loadSession, saveSession } from "../session.js";
 import { ensureBranch, diffStat } from "../lib/git.js";
 
@@ -12,7 +12,7 @@ export async function firebase(
   opts: { devProject?: string; model?: string }
 ): Promise<void> {
   const cfg = getConfig(opts.model);
-  requireApiKey(cfg);
+  requireClaudeCli();
 
   if (!opts.devProject) {
     console.error("Provide the dev Firebase project id:  fa firebase --dev-project <id>");

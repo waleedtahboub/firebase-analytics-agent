@@ -2,7 +2,7 @@ import { detectFlutter } from "../flutter/detect.js";
 import { createAnalyticsTools } from "../tools/index.js";
 import { analyzeSystem, analyzeUser } from "../prompts/index.js";
 import { runPhase } from "../agent.js";
-import { getConfig, requireApiKey } from "../config.js";
+import { getConfig, requireClaudeCli } from "../config.js";
 import { saveSession, statePaths } from "../session.js";
 
 export async function analyze(
@@ -10,7 +10,7 @@ export async function analyze(
   opts: { figma?: string; model?: string }
 ): Promise<void> {
   const cfg = getConfig(opts.model);
-  requireApiKey(cfg);
+  requireClaudeCli();
 
   const detect = detectFlutter(projectPath);
   if (!detect.dependencies.length) {
