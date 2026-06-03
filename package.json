@@ -1,0 +1,31 @@
+{
+  "name": "firebase-analytics-agent",
+  "version": "0.1.0",
+  "description": "End-to-end agent that adds Firebase Analytics to a Flutter app: analyze code (+Figma) -> Excel approval -> technical plan -> dev-first implementation.",
+  "type": "module",
+  "bin": {
+    "fa": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/cli.ts",
+    "fa": "tsx src/cli.ts"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.161",
+    "commander": "^15.0.0",
+    "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
