@@ -1,5 +1,7 @@
 # Firebase Analytics Agent
 
+> An AI agent that adds production-ready Firebase Analytics to any Flutter app — from zero to DebugView-verified events, with a human approval step in the middle.
+
 An end-to-end agent that adds **Firebase Analytics** to any **Flutter** app.
 
 It reads the codebase (and optionally a Figma file), proposes a tracking plan as an **Excel sheet you approve**, writes a technical implementation plan, and then **implements it dev-first** — following the project's own conventions (Bloc or Riverpod, `get_it`/`injectable`, flavors). It never commits or pushes.
@@ -280,6 +282,53 @@ FA_MODEL=claude-sonnet-4-6
 
 ---
 
+## How it works under the hood
+
+The agent is built on the **[Claude Agent SDK](https://github.com/anthropic-ai/claude-agent-sdk)** (`@anthropic-ai/claude-agent-sdk`). It runs entirely on your machine — your code never leaves your environment.
+
+```
+your machine
+├── fa CLI (Node/TypeScript)
+│     └── Claude Agent SDK
+│           └── shells out to the `claude` CLI binary
+│                 └── uses your Claude Code login (no separate API key)
+└── your Flutter project (read + edited in place)
+```
+
+Each phase runs an agent loop that:
+1. Gets a system prompt describing the Flutter project (detected deterministically — no API call)
+2. Uses built-in tools (`Read`, `Grep`, `Glob`, `Edit`, `Write`, `Bash`) to explore and modify the codebase
+3. Uses custom MCP tools (`excel_write_tracking`, `excel_read_tracking`, `figma_get_screens`) for the Excel handoff and optional Figma cross-referencing
+4. Saves a session ID so the next phase resumes with full prior context — no re-reading the whole codebase
+
+**Privacy:** No code, no event names, and no project data are sent anywhere except to the Claude API to run the agent (same as using Claude Code normally). The Excel file and implementation plan live only on your machine.
+
+---
+
+## Contributing
+
+PRs are welcome! If you find a bug or want to add a feature, please open an issue first so we can discuss the approach.
+
+**Good first contributions:**
+- Support for additional state management patterns (MobX, Provider)
+- Better handling of monorepo / multi-package Flutter projects
+- A `fa reset` command to clear session state cleanly
+- Tests for the phase logic
+
+**To set up locally:**
+
+```bash
+git clone https://github.com/waleedtahboub/firebase-analytics-agent.git
+cd firebase-analytics-agent
+npm install
+npm run typecheck   # should be clean
+npm run build
+```
+
+Please keep PRs focused — one feature or fix per PR. Run `npm run typecheck` before submitting.
+
+---
+
 ## Troubleshooting
 
 | Problem | Fix |
@@ -296,4 +345,18 @@ FA_MODEL=claude-sonnet-4-6
 
 ## Using with Claude Code (`/firebase-analytics`)
 
+
 If your team uses Claude Code, the skill is installed at `~/.claude/skills/firebase-analytics`. Just type `/firebase-analytics` in any Claude Code session — it will ask for your project path and drive the whole pipeline conversationally.
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
+
+---
+
+![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Claude](https://img.shields.io/badge/powered%20by-Claude%20Agent%20SDK-blueviolet)

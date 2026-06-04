@@ -15,7 +15,7 @@
   "engines": {
     "node": ">=18"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.161",
     "commander": "^15.0.0",
