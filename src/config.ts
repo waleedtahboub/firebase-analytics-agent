@@ -26,7 +26,20 @@ export const packageRoot = findPackageRoot(moduleDir);
 loadEnv({ path: join(packageRoot, ".env"), quiet: true });
 loadEnv({ quiet: true });
 
-export const DEFAULT_MODEL = "claude-opus-4-8";
+// Per-phase model defaults.
+// analyze + plan need deep reasoning over a large codebase → Opus.
+// Everything else (ask, firebase, implement, promote-prod) → Sonnet (faster + cheaper).
+export const MODEL_OPUS   = "claude-opus-4-8";
+export const MODEL_SONNET = "claude-sonnet-4-6";
+
+export const PHASE_MODELS: Record<string, string> = {
+  analyze:      MODEL_OPUS,
+  plan:         MODEL_OPUS,
+  ask:          MODEL_SONNET,
+  firebase:     MODEL_SONNET,
+  implement:    MODEL_SONNET,
+  "promote-prod": MODEL_SONNET,
+};
 
 export interface AgentConfig {
   figmaToken?: string;
@@ -34,11 +47,12 @@ export interface AgentConfig {
   model: string;
 }
 
-export function getConfig(overrideModel?: string): AgentConfig {
+export function getConfig(phase: string, overrideModel?: string): AgentConfig {
+  const phaseDefault = PHASE_MODELS[phase] ?? MODEL_SONNET;
   return {
     figmaToken: process.env.FIGMA_TOKEN,
     firebaseToken: process.env.FIREBASE_TOKEN,
-    model: overrideModel || process.env.FA_MODEL || DEFAULT_MODEL,
+    model: overrideModel || process.env.FA_MODEL || phaseDefault,
   };
 }
 

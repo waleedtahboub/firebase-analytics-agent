@@ -19,7 +19,7 @@ fa <command>
 node "C:/Users/walee_/Desktop/root/01_24Online/03_tools/firebase-analytics-agent/dist/cli.js" <command>
 ```
 
-Requires `ANTHROPIC_API_KEY` (and `FIGMA_TOKEN` for Figma) in the agent's `.env` or the environment.
+Requires the `claude` CLI to be installed and authenticated (`claude login`). Optionally set `FIGMA_TOKEN` in the agent's `.env` for Figma cross-referencing.
 
 ## How to drive it (stop at every checkpoint — do NOT chain phases without the user)
 

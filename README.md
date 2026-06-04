@@ -1,79 +1,299 @@
 # Firebase Analytics Agent
 
-An end-to-end agent that adds **Firebase Analytics** to a **Flutter** app. It analyzes the
-codebase (and optionally a Figma file), proposes a tracking plan as an **Excel sheet you approve**,
-writes a technical plan, and then **implements it dev-first** — following each project's own
-conventions (Bloc or Riverpod, `get_it`/`injectable`, flavors).
+An end-to-end agent that adds **Firebase Analytics** to any **Flutter** app.
 
-Built on the local **Claude Agent SDK** (`@anthropic-ai/claude-agent-sdk`): it runs on your
-machine and edits your repo in place, on a git branch. It never commits or pushes.
+It reads the codebase (and optionally a Figma file), proposes a tracking plan as an **Excel sheet you approve**, writes a technical implementation plan, and then **implements it dev-first** — following the project's own conventions (Bloc or Riverpod, `get_it`/`injectable`, flavors). It never commits or pushes.
 
-## The workflow
+---
+
+## How it works (the big picture)
 
 ```
-fa analyze <project> [--figma <url>]   # 1. read code (+Figma) -> tracking.xlsx
-#   ↳ you open tracking.xlsx and fill "Final Approval": 1 = do it, 0 = skip
-fa ask "<question>"                     # 2. (optional) ask about any event
-fa plan                                 # 3. read approved rows -> IMPLEMENTATION_PLAN.md
-#   ↳ you review / edit the plan
-fa firebase --dev-project <id>          # 4. connect/init Firebase (DEV) — idempotent
-fa implement                            # 5. implement approved events in the DEV flavor (on a branch)
-#   ↳ you run the dev flavor + Firebase DebugView and confirm events
-fa promote-prod --prod-project <id>     # 6. replicate the wiring into the PROD flavor
+Your Flutter project
+       │
+       ▼
+  fa analyze          ← agent reads every screen, route, cubit, bloc
+       │                 and proposes events in a spreadsheet
+       ▼
+  tracking.xlsx        ← YOU open this and mark each event 1 (do it) or 0 (skip)
+       │
+       ▼
+  fa plan             ← agent reads your approvals and writes a technical plan
+       │
+       ▼
+  IMPLEMENTATION_PLAN.md  ← YOU review and edit if needed
+       │
+       ▼
+  fa firebase         ← agent connects the Firebase dev project (idempotent)
+       │
+       ▼
+  fa implement        ← agent writes all the Dart code (DEV flavor only, on a branch)
+       │
+       ▼
+  You test in DebugView  ← run the dev flavor, confirm events appear in Firebase
+       │
+       ▼
+  fa promote-prod     ← agent mirrors the wiring to the PROD flavor
 ```
 
-`fa status` shows what was detected and which phase you're in.
+The agent runs on your machine and edits your repo directly. You stay in control at every checkpoint.
+
+---
 
 ## Prerequisites
 
-- **Node 18+**
-- A **Flutter** project (state management: Bloc or Riverpod; `get_it`/`injectable` supported).
-- **`ANTHROPIC_API_KEY`** — the agent uses Claude.
-- For `--figma`: a **`FIGMA_TOKEN`** (Figma personal access token).
-- For `firebase` / `promote-prod`: the **`flutterfire`** and **`firebase`** CLIs installed and
-  authenticated (`firebase login` once, or set `FIREBASE_TOKEN`).
+| Requirement | Notes |
+|-------------|-------|
+| **Node 18+** | `node --version` to check |
+| **Claude Code CLI** | Install from [claude.ai/download](https://claude.ai/download), then run `claude login` once |
+| **Flutter project** | Bloc or Riverpod; `get_it`/`injectable` supported |
+| **`flutterfire` CLI** | Only needed for `fa firebase` and `fa promote-prod` — `dart pub global activate flutterfire_cli` |
+| **`firebase` CLI** | Only needed for `fa firebase` and `fa promote-prod` — install from [firebase.tools](https://firebase.tools), then `firebase login` |
+| **`FIGMA_TOKEN`** *(optional)* | Only if you want Figma cross-referencing during `fa analyze` |
+
+---
 
 ## Install
 
 ```bash
+# 1. Clone / navigate to the agent repo
+cd path/to/firebase-analytics-agent
+
+# 2. Install dependencies and build
 npm install
 npm run build
-npm link        # optional: puts `fa` on your PATH. Otherwise use: node dist/cli.js <cmd>
+
+# 3. Put the `fa` command on your PATH (one-time, machine-wide)
+npm link
 ```
 
-## Configure
+After `npm link`, the `fa` command is available everywhere. No API key needed — it uses your Claude Code login.
+
+### Optional: Figma token
+
+Create a `.env` file in the agent repo root:
+
+```
+FIGMA_TOKEN=your_figma_personal_access_token
+```
+
+---
+
+## Quick start
 
 ```bash
-cp .env.example .env       # then fill in ANTHROPIC_API_KEY, FIGMA_TOKEN, (FIREBASE_TOKEN)
+# Check what the agent detects about your project (no API call, instant)
+fa status --project path/to/your/flutter/app
+
+# Run the full analysis → produces tracking.xlsx
+fa analyze path/to/your/flutter/app
+
+# With Figma cross-referencing
+fa analyze path/to/your/flutter/app --figma https://www.figma.com/file/...
 ```
 
-## Safety & conventions
+---
 
-- **Dev-first.** `implement` only touches the dev flavor; prod is a separate, explicit
-  `promote-prod` step.
-- **On a branch.** Code changes happen on `analytics/firebase-analytics`. The agent **never
-  commits or pushes** — you review the diff and commit.
-- **No PII.** Generated tracking never logs phone, email, name, avatar, national-ID, card, or GPS.
-- **Conventions per repo.** Event names + params are `snake_case`; Dart methods are `camelCase`
-  (`logX`); the service goes where the repo already keeps shared services (e.g.
-  `lib/src/common/analytics/`, mirroring an existing `notification/`), falling back to
-  `lib/services/firebase_analytics/`.
+## Step-by-step guide
 
-## State
-
-Per-project progress lives in `<project>/.analytics-agent/` (git-ignored in your tool, but
-add it to the target app's `.gitignore`): `tracking.xlsx`, `tracking.json`,
-`IMPLEMENTATION_PLAN.md`, `figma-mappings.json`, `session.json`, `run.log`.
-
-## Cost
-
-Each `analyze`/`implement` run makes several Opus calls over a large codebase, so it is not free.
-Use `--model claude-sonnet-4-6` (or set `FA_MODEL`) to downshift. Back-to-back phases benefit from
-prompt caching.
-
-## Self-test (no API key)
+### Step 1 — Analyze
 
 ```bash
-npx tsx scripts/selftest.ts     # verifies the Excel write/read round-trip
-fa status --project <flutter-app>   # verifies project detection
+fa analyze path/to/flutter/app
 ```
+
+The agent explores the codebase, maps every user journey, and proposes analytics events.
+When it finishes, open:
+
+```
+path/to/flutter/app/.analytics-agent/tracking.xlsx
+```
+
+Fill the **Final Approvel?** column:
+- `1` = implement this event
+- `0` = skip it
+- leave blank = undecided (agent will skip)
+
+Save and close the file.
+
+---
+
+### Step 2 — Ask (optional)
+
+Have a question about a specific event before approving?
+
+```bash
+fa ask "Should we track the OTP resend separately or fold it into otp_failed?" \
+  --project path/to/flutter/app
+```
+
+The agent answers using the analysis context it already has.
+
+---
+
+### Step 3 — Plan
+
+```bash
+fa plan --project path/to/flutter/app
+```
+
+The agent reads your approved events and writes a technical plan to:
+
+```
+path/to/flutter/app/.analytics-agent/IMPLEMENTATION_PLAN.md
+```
+
+Review it. Edit if needed. Proceed when happy.
+
+---
+
+### Step 4 — Connect Firebase (dev)
+
+```bash
+fa firebase --dev-project your-dev-firebase-project-id \
+  --project path/to/flutter/app
+```
+
+The agent is **idempotent** — if Firebase is already wired, it verifies the setup and only adds what's missing (e.g. `firebase_analytics` package). It only touches the **dev** flavor.
+
+> If it says the `flutterfire` or `firebase` CLI is missing, install them first (see Prerequisites), then re-run.
+
+---
+
+### Step 5 — Implement (dev only)
+
+```bash
+fa implement --project path/to/flutter/app
+```
+
+The agent writes all the Dart code:
+- `AnalyticsService` (abstract) + `FirebaseAnalyticsService` (impl)
+- Event-name constants + PII sanitizer
+- DI registration (`get_it`/`injectable` or Riverpod)
+- Route observer for `screen_view`
+- All approved log calls at the exact firing sites
+
+Changes go on the `analytics/firebase-analytics` branch. **The agent never commits or pushes.**
+
+Verify:
+1. Run the **dev** flavor of the app
+2. Open **Firebase DebugView** in the Firebase console
+3. Confirm the events appear as you use the app
+
+---
+
+### Step 6 — Promote to prod (only when dev is verified)
+
+```bash
+fa promote-prod --prod-project your-prod-firebase-project-id \
+  --project path/to/flutter/app
+```
+
+Mirrors the dev wiring exactly into the prod flavor. Same branch, no commit.
+
+---
+
+### Commit when done
+
+The agent leaves all changes staged on the `analytics/firebase-analytics` branch. When you're satisfied:
+
+```bash
+cd path/to/flutter/app
+git add -A
+git commit -m "Add Firebase Analytics (approved events, dev-first)"
+# then open a PR as normal
+```
+
+---
+
+## All commands
+
+```bash
+fa analyze [projectPath] [--figma <url>] [--model <model>]
+fa ask "<question>"      [--project <path>] [--model <model>]
+fa plan                  [--project <path>] [--model <model>]
+fa firebase              --dev-project <id> [--project <path>] [--model <model>]
+fa implement             [--project <path>] [--model <model>]
+fa promote-prod          --prod-project <id> [--project <path>] [--model <model>]
+fa status                [--project <path>]
+```
+
+`[projectPath]` and `--project` default to the **current directory** if omitted.
+
+---
+
+## State files
+
+Everything the agent produces lives in `<project>/.analytics-agent/` — add this to the Flutter project's `.gitignore`:
+
+```
+.analytics-agent/
+```
+
+| File | What it is |
+|------|-----------|
+| `tracking.xlsx` | The event plan spreadsheet (you fill Final Approvel?) |
+| `tracking.json` | Machine-readable mirror of the spreadsheet |
+| `IMPLEMENTATION_PLAN.md` | Technical plan written by `fa plan` |
+| `session.json` | Saved agent context (enables resume across CLI runs) |
+| `run.log` | Full agent output log for debugging |
+
+---
+
+## Safety rules (enforced by the agent)
+
+| Rule | What it means |
+|------|--------------|
+| **Dev-first** | `fa implement` only touches the dev flavor; prod is a separate explicit step |
+| **No auto-commit** | Agent edits on a branch and stops — you review and commit |
+| **No PII** | Never logs phone, email, name, avatar, national ID, card data, or GPS |
+| **Idempotent Firebase setup** | Re-running `fa firebase` verifies instead of clobbering |
+| **Conventions per repo** | Service placed where the repo already keeps shared services |
+
+---
+
+## Cost & model
+
+Each phase uses the best model for the job by default:
+
+| Phase | Default model | Why |
+|-------|--------------|-----|
+| `fa analyze` | **Opus** | Deep codebase reasoning — needs the most capable model |
+| `fa plan` | **Opus** | Designing the full technical implementation plan |
+| `fa ask` | Sonnet | Q&A, much lighter task |
+| `fa firebase` | Sonnet | Mostly file edits and CLI calls |
+| `fa implement` | Sonnet | Follows the plan written by Opus |
+| `fa promote-prod` | Sonnet | Mirrors dev wiring to prod |
+
+You can override any phase with `--model`:
+
+```bash
+fa analyze path/to/app --model claude-sonnet-4-6   # cheaper analyze
+fa implement --model claude-opus-4-8               # stronger implement
+```
+
+Or override all phases permanently in the agent's `.env`:
+
+```
+FA_MODEL=claude-sonnet-4-6
+```
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `claude: command not found` | Install Claude Code from [claude.ai/download](https://claude.ai/download) and run `claude login` |
+| `fa: command not found` | Run `npm link` from the agent repo, or use `node dist/cli.js <cmd>` |
+| `No prior analysis found` | Run `fa analyze` first — each phase requires the previous one |
+| `flutterfire: command not found` | Run `dart pub global activate flutterfire_cli` |
+| `firebase: command not found` | Install from [firebase.tools](https://firebase.tools) and run `firebase login` |
+| Excel file locked error | Close `tracking.xlsx` in Excel before running the next phase |
+| Want to re-run analysis from scratch | Delete `.analytics-agent/` in the Flutter project and re-run `fa analyze` |
+
+---
+
+## Using with Claude Code (`/firebase-analytics`)
+
+If your team uses Claude Code, the skill is installed at `~/.claude/skills/firebase-analytics`. Just type `/firebase-analytics` in any Claude Code session — it will ask for your project path and drive the whole pipeline conversationally.

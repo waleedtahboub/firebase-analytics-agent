@@ -9,16 +9,22 @@ export interface ColumnDef {
 }
 
 export const COLUMNS: ColumnDef[] = [
-  { key: "eventName", header: "Event Name", width: 30 },
-  { key: "description", header: "Description", width: 60, wrap: true },
-  { key: "parameters", header: "Parameters", width: 40, wrap: true },
-  { key: "screen", header: "Screen", width: 24, wrap: true },
-  { key: "notes", header: "Notes", width: 34, wrap: true },
-  { key: "finalApproval", header: "Final Approval", width: 14 },
+  { key: "rowNum",        header: "#",                              width: 5  },
+  { key: "section",       header: "Section",                        width: 26, wrap: true },
+  { key: "priority",      header: "Priority",                       width: 9  },
+  { key: "whatWeTrack",   header: "What we track",                  width: 30, wrap: true },
+  { key: "whyItMatters",  header: "Why it matters / what it answers", width: 52, wrap: true },
+  { key: "eventName",     header: "Event (for dev)",                width: 36, wrap: true },
+  { key: "approve",       header: "Approve?",                       width: 10 },
+  { key: "notes",         header: "Notes",                          width: 36, wrap: true },
+  { key: "finalApproval", header: "Final Approvel?",                width: 14 },
 ];
 
-/** 1-based index of the Final Approval column (the user-decision column). */
+/** 1-based index of the Final Approvel? column (the user-decision column). */
 export const APPROVAL_COL_INDEX = COLUMNS.findIndex((c) => c.key === "finalApproval") + 1;
+
+/** 1-based index of the Event (for dev) column — used by the reader as the event name key. */
+export const EVENT_NAME_COL_INDEX = COLUMNS.findIndex((c) => c.key === "eventName") + 1;
 
 /** ARGB colors (exceljs wants the leading FF alpha). */
 export const COLORS = {

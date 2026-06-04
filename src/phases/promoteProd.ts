@@ -10,7 +10,7 @@ export async function promoteProd(
   projectPath: string,
   opts: { prodProject?: string; model?: string }
 ): Promise<void> {
-  const cfg = getConfig(opts.model);
+  const cfg = getConfig("promote-prod", opts.model);
   requireClaudeCli();
 
   if (!opts.prodProject) {
@@ -24,6 +24,8 @@ export async function promoteProd(
   if (branch.ok) {
     console.log(`▶ Promoting to PROD on branch ${branch.branch}`);
     saveSession(projectPath, { branch: branch.branch });
+  } else {
+    console.warn("⚠ Not a git repo (or branch switch failed) — proceeding without a branch.");
   }
   saveSession(projectPath, { prodProject: opts.prodProject });
 

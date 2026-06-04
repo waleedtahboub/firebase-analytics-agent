@@ -2,7 +2,7 @@
 import ExcelJS from "exceljs";
 import { existsSync } from "node:fs";
 import { tool } from "@anthropic-ai/claude-agent-sdk";
-import { APPROVAL_COL_INDEX } from "../lib/excelSchema.js";
+import { APPROVAL_COL_INDEX, EVENT_NAME_COL_INDEX } from "../lib/excelSchema.js";
 import { statePaths } from "../session.js";
 import type { TrackingEvent } from "../types.js";
 
@@ -25,17 +25,18 @@ export async function readTrackingExcel(path: string): Promise<TrackingEvent[]> 
   ws.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return; // header
     const get = (i: number) => cellText(row.getCell(i).value).trim();
-    const eventName = get(1);
+    const eventName = get(EVENT_NAME_COL_INDEX); // col 6 = "Event (for dev)"
     if (!eventName) return; // skip blank rows
-    const raw = get(APPROVAL_COL_INDEX);
+    const raw = get(APPROVAL_COL_INDEX); // col 9 = "Final Approvel?"
     let finalApproval: number | null = raw === "" ? null : Number(raw);
     if (finalApproval !== null && Number.isNaN(finalApproval)) finalApproval = null;
     events.push({
+      section:      get(2),
+      priority:     get(3),
+      whatWeTrack:  get(4),
+      whyItMatters: get(5),
       eventName,
-      description: get(2),
-      parameters: get(3),
-      screen: get(4),
-      notes: get(5),
+      notes:        get(8),
       finalApproval,
     });
   });

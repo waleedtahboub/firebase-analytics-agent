@@ -7,7 +7,7 @@ import { getConfig, requireClaudeCli } from "../config.js";
 import { loadSession, statePaths } from "../session.js";
 
 export async function plan(projectPath: string, opts: { model?: string }): Promise<void> {
-  const cfg = getConfig(opts.model);
+  const cfg = getConfig("plan", opts.model);
   requireClaudeCli();
 
   const paths = statePaths(projectPath);
@@ -18,6 +18,12 @@ export async function plan(projectPath: string, opts: { model?: string }): Promi
   }
 
   const session = loadSession(projectPath);
+  if (!session.sessionId) {
+    console.error("No prior analysis found. Run `fa analyze` first.");
+    process.exitCode = 1;
+    return;
+  }
+
   const detect = detectFlutter(projectPath);
   const { mcpServers, toolNames } = createAnalyticsTools({
     projectPath,

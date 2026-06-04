@@ -9,7 +9,7 @@ export async function analyze(
   projectPath: string,
   opts: { figma?: string; model?: string }
 ): Promise<void> {
-  const cfg = getConfig(opts.model);
+  const cfg = getConfig("analyze", opts.model);
   requireClaudeCli();
 
   const detect = detectFlutter(projectPath);

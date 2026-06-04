@@ -9,7 +9,7 @@ import { ensureBranch, diffStat } from "../lib/git.js";
 import { ANALYTICS_BRANCH } from "./firebase.js";
 
 export async function implement(projectPath: string, opts: { model?: string }): Promise<void> {
-  const cfg = getConfig(opts.model);
+  const cfg = getConfig("implement", opts.model);
   requireClaudeCli();
 
   const paths = statePaths(projectPath);
@@ -19,7 +19,9 @@ export async function implement(projectPath: string, opts: { model?: string }): 
     return;
   }
   if (!existsSync(paths.plan)) {
-    console.warn("⚠ No IMPLEMENTATION_PLAN.md found — running `fa plan` first is recommended.");
+    console.error("No IMPLEMENTATION_PLAN.md found. Run `fa plan` first.");
+    process.exitCode = 1;
+    return;
   }
 
   const detect = detectFlutter(projectPath);
@@ -32,6 +34,12 @@ export async function implement(projectPath: string, opts: { model?: string }): 
   }
 
   const session = loadSession(projectPath);
+  if (!session.sessionId) {
+    console.error("No prior analysis found. Run `fa analyze` first.");
+    process.exitCode = 1;
+    return;
+  }
+
   const { mcpServers, toolNames } = createAnalyticsTools({
     projectPath,
     figmaToken: cfg.figmaToken,

@@ -32,23 +32,30 @@ export async function writeTrackingExcel(
   });
 
   // Data rows.
-  events.forEach((e) => {
+  events.forEach((e, i) => {
     const row = ws.addRow({
-      eventName: e.eventName,
-      description: e.description,
-      parameters: e.parameters,
-      screen: e.screen,
-      notes: e.notes ?? "",
+      rowNum:       i + 1,
+      section:      e.section ?? "",
+      priority:     e.priority ?? "",
+      whatWeTrack:  e.whatWeTrack ?? "",
+      whyItMatters: e.whyItMatters ?? "",
+      eventName:    e.eventName ?? "",
+      approve:      "",
+      notes:        e.notes ?? "",
       finalApproval: e.finalApproval ?? "",
     });
     row.alignment = { vertical: "top", wrapText: true };
     const lines = Math.max(
       1,
-      Math.ceil((e.description || "").length / 58),
-      Math.ceil((e.parameters || "").length / 38)
+      Math.ceil((e.whyItMatters || "").length / 50),
+      Math.ceil((e.whatWeTrack || "").length / 28)
     );
     row.height = Math.max(28, lines * 14 + 6);
     row.eachCell({ includeEmpty: true }, (cell) => (cell.border = border));
+    // Center the short columns
+    row.getCell(1).alignment = { vertical: "middle", horizontal: "center" };
+    row.getCell(3).alignment = { vertical: "middle", horizontal: "center" };
+    row.getCell(7).alignment = { vertical: "middle", horizontal: "center" };
     row.getCell(APPROVAL_COL_INDEX).alignment = { vertical: "middle", horizontal: "center" };
   });
 
@@ -120,11 +127,12 @@ export function makeExcelWriteTool(ctx: { projectPath: string }) {
       events: z
         .array(
           z.object({
-            eventName: z.string().describe("Firebase event name, snake_case"),
-            description: z.string().describe("What it tracks and why it matters"),
-            parameters: z.string().describe('Params as "key:type, key:type", or "" if none'),
-            screen: z.string().describe("Where it fires (screen/route/widget)"),
-            notes: z.string().describe("Clarifications for the team, or empty string"),
+            section:      z.string().describe('Business section, e.g. "A · Acquisition & Onboarding"'),
+            priority:     z.string().describe("Priority tier: P0 (must-have), P1 (important), P2 (nice-to-have)"),
+            whatWeTrack:  z.string().describe('Short human label, e.g. "Sign-up completed"'),
+            whyItMatters: z.string().describe("Business rationale — what question this event answers"),
+            eventName:    z.string().describe("Firebase event name (snake_case) + params + firing screen, e.g. \"sign_up | method:string | RegisterAccountPage\""),
+            notes:        z.string().describe("Implementation hints, PII warnings, or empty string"),
           })
         )
         .describe("All proposed analytics events"),

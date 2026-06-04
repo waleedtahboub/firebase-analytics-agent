@@ -10,7 +10,7 @@ export async function ask(
   question: string,
   opts: { model?: string }
 ): Promise<void> {
-  const cfg = getConfig(opts.model);
+  const cfg = getConfig("ask", opts.model);
   requireClaudeCli();
 
   const session = loadSession(projectPath);

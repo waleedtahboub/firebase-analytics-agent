@@ -11,7 +11,7 @@ export async function firebase(
   projectPath: string,
   opts: { devProject?: string; model?: string }
 ): Promise<void> {
-  const cfg = getConfig(opts.model);
+  const cfg = getConfig("firebase", opts.model);
   requireClaudeCli();
 
   if (!opts.devProject) {
@@ -31,6 +31,12 @@ export async function firebase(
   saveSession(projectPath, { devProject: opts.devProject });
 
   const session = loadSession(projectPath);
+  if (!session.sessionId) {
+    console.error("No prior analysis found. Run `fa analyze` first.");
+    process.exitCode = 1;
+    return;
+  }
+
   const res = await runPhase({
     projectPath,
     systemPrompt: firebaseSystem(detect, opts.devProject),

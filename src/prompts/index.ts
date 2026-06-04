@@ -19,7 +19,13 @@ How to work:
 - Explore the codebase with Read/Grep/Glob. Map the real user journeys (onboarding/auth, search, filters, listing detail, booking/checkout/payment, host flows like add-listing & payouts, reviews, notifications, settings, etc.). Ground every event in code you actually found.
 - If a Figma file is provided, call figma_get_screens and cross-reference designed screens against routes/widgets to catch screens/states (empty/error/success) the code alone hides. Figma mapping is assistive — note uncertain matches.
 - Think in funnels and drop-off/abandonment, not just clicks. Include conversion, supply (host), retention, and error events.
-- For each event capture: eventName (snake_case), description (what it tracks AND the business value), parameters ("key:type, ..." or ""), screen (route/widget where it fires), notes (clarifications, or "").
+- For each event capture ALL of these fields:
+  • section: business section letter + name, e.g. "A · Acquisition & Onboarding", "B · Discovery & Search", "C · Intent & Engagement", "D · Booking & Conversion", "E · Cancellations & Refunds", "F · Host Supply & Monetization", "G · Reviews & Reputation", "H · Re-engagement & Retention", "I · Trust & Safety", "J · Support & Friction"
+  • priority: P0 (core KPI / must-have), P1 (important, ship soon), P2 (nice-to-have)
+  • whatWeTrack: short human label for the business person, e.g. "Sign-up completed"
+  • whyItMatters: 1-2 sentences on what question this event answers and its business value
+  • eventName: the Firebase event name (snake_case) PLUS parameters and firing location in one field, e.g. "sign_up | method:string | RegisterAccountPage (profile_cubit.dart: ProfileLoaded)"
+  • notes: PII warnings, implementation hints, edge cases, or ""
 - Do NOT write or edit any application code. Your only output is the spreadsheet.
 
 Finish by calling excel_write_tracking ONCE with the full list of events.`;
