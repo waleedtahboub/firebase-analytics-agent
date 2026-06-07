@@ -86,7 +86,7 @@ Steps:
 4. Implement/extend the route observer for screen_view and attach it.
    NAVIGATOR OBSERVER RULE: Flutter requires each navigator to receive a FRESH observer instance — a singleton shared across navigators will crash with "observer.navigator == null". Do NOT pass get<AppRouteObserver>() directly. Instead wire it as: navigatorObservers: () => [AppRouteObserver(get<AnalyticsService>())] so a new instance is constructed per navigator.
 5. Initialize analytics inside ${devInit}. CRITICAL ORDER: Firebase.initializeApp() MUST be called BEFORE get.init() / configureDependencies(). The DI container resolves FirebaseAnalytics.instance at init time; if Firebase is not yet initialized it throws "No Firebase App '[DEFAULT]' has been created". Always: (1) Firebase.initializeApp, then (2) get.init, then (3) setAnalyticsCollectionEnabled.
-6. Add the log calls at the exact approved firing sites.
+6. Add the log calls at the exact approved firing sites. If "user_id_set" is approved, add a setUserId(userId) method to AnalyticsService, implement it in FirebaseAnalyticsService (_fa.setUserId(id: userId)) and NoopAnalyticsService, then call it in the profile cubit when the user loads (set) and on sign-out (pass null to clear).
 7. SELF-CHECK: confirm every approved event is implemented and named correctly; run \`dart run build_runner build --delete-conflicting-outputs\` (if injectable is used) and \`flutter analyze\`; fix any issues you introduced.
 8. Print a summary: events implemented, files created/modified, and how to verify in Firebase DebugView (dev flavor).`;
 }
