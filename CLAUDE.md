@@ -22,6 +22,7 @@ fa plan --project <path>                 # approved events → IMPLEMENTATION_PL
 fa firebase --dev-project <id> --project <path>   # connect Firebase DEV
 fa implement --project <path>            # write Dart code (DEV only, on branch)
 fa promote-prod --prod-project <id> --project <path>  # mirror to PROD
+fa report --project <path>               # business-friendly summary of what was implemented
 fa status --project <path>               # show detection + current phase (no API call)
 ```
 
@@ -53,6 +54,7 @@ src/
     firebase.ts       — fa firebase
     implement.ts      — fa implement
     promoteProd.ts    — fa promote-prod
+    report.ts         — fa report
 scripts/
   selftest.ts         — Excel round-trip test (no API needed)
   reconcile.mjs       — one-off: maps TRACKING_CHECKLIST.xlsx approvals → tracking.xlsx
@@ -66,7 +68,7 @@ skill/
 |-------|-------|--------|
 | analyze | `claude-opus-4-8` | Deep codebase reasoning |
 | plan | `claude-opus-4-8` | Full technical plan design |
-| ask / firebase / implement / promote-prod | `claude-sonnet-4-6` | Lighter tasks |
+| ask / firebase / implement / promote-prod / report | `claude-sonnet-4-6` | Lighter tasks |
 
 Override per-run with `--model <model>` or permanently with `FA_MODEL=` in `.env`.
 

@@ -7,6 +7,7 @@ import { plan } from "./phases/plan.js";
 import { firebase } from "./phases/firebase.js";
 import { implement } from "./phases/implement.js";
 import { promoteProd } from "./phases/promoteProd.js";
+import { report } from "./phases/report.js";
 import { loadSession, statePaths } from "./session.js";
 import { detectFlutter, describeDetect } from "./flutter/detect.js";
 
@@ -73,6 +74,15 @@ program
   .option("--model <model>", "Override the model")
   .action(async (options: { prodProject: string; project?: string; model?: string }) => {
     await promoteProd(proj(options.project), { prodProject: options.prodProject, model: options.model });
+  });
+
+program
+  .command("report")
+  .description("Generate a visual summary of what was implemented and how to verify it in Firebase")
+  .option("--project <path>", "Project path (default: current directory)")
+  .option("--model <model>", "Override the model")
+  .action(async (options: { project?: string; model?: string }) => {
+    await report(proj(options.project), { model: options.model });
   });
 
 program

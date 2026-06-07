@@ -53,7 +53,8 @@ export type Phase =
   | "planned"
   | "firebase"
   | "implemented"
-  | "promoted";
+  | "promoted"
+  | "reported";
 
 /** Persisted between CLI runs in <project>/.analytics-agent/session.json. */
 export interface SessionState {

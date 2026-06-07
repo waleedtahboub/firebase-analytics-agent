@@ -36,6 +36,10 @@ Your Flutter project
        │
        ▼
   fa promote-prod     ← agent mirrors the wiring to the PROD flavor
+       │
+       ▼
+  fa report           ← agent prints a business-friendly summary of what was
+                         tracked, how to see it in Firebase, and what was skipped
 ```
 
 The agent runs on your machine and edits your repo directly. You stay in control at every checkpoint.
@@ -184,7 +188,24 @@ Verify:
 
 ---
 
-### Step 6 — Promote to prod (only when dev is verified)
+### Step 6 — Get the report (optional, any time after implement)
+
+```bash
+fa report --project path/to/flutter/app
+```
+
+Generates a human-readable summary for product and business stakeholders:
+
+- **What we track** — table of all implemented events grouped by domain (Auth, Discovery, Booking, etc.) with what each event means and where it fires
+- **How to see it in Firebase** — step-by-step guide to DebugView + which events to watch for key business questions (sign-up funnel, booking drop-off, etc.)
+- **What we don't track** — skipped events and why
+- **Status** — current phase (DEV / PROD) and what the next step is
+
+No API call to the codebase is wasted — it reads your existing `tracking.xlsx` and the analytics service files that were already written.
+
+---
+
+### Step 7 — Promote to prod (only when dev is verified)
 
 ```bash
 fa promote-prod --prod-project your-prod-firebase-project-id \
@@ -195,7 +216,7 @@ Mirrors the dev wiring exactly into the prod flavor. Same branch, no commit.
 
 ---
 
-### Commit when done
+### Commit when done (after Step 7)
 
 The agent leaves all changes staged on the `analytics/firebase-analytics` branch. When you're satisfied:
 
@@ -217,6 +238,7 @@ fa plan                  [--project <path>] [--model <model>]
 fa firebase              --dev-project <id> [--project <path>] [--model <model>]
 fa implement             [--project <path>] [--model <model>]
 fa promote-prod          --prod-project <id> [--project <path>] [--model <model>]
+fa report                [--project <path>] [--model <model>]
 fa status                [--project <path>]
 ```
 
@@ -266,6 +288,7 @@ Each phase uses the best model for the job by default:
 | `fa firebase` | Sonnet | Mostly file edits and CLI calls |
 | `fa implement` | Sonnet | Follows the plan written by Opus |
 | `fa promote-prod` | Sonnet | Mirrors dev wiring to prod |
+| `fa report` | Sonnet | Reads existing files, no heavy reasoning needed |
 
 You can override any phase with `--model`:
 

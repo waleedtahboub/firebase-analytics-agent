@@ -39,6 +39,7 @@ export const PHASE_MODELS: Record<string, string> = {
   firebase:     MODEL_SONNET,
   implement:    MODEL_SONNET,
   "promote-prod": MODEL_SONNET,
+  report:         MODEL_SONNET,
 };
 
 export interface AgentConfig {
