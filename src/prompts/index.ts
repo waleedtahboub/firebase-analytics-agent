@@ -26,6 +26,7 @@ How to work:
   • whyItMatters: 1-2 sentences on what question this event answers and its business value
   • eventName: the Firebase event name (snake_case) PLUS parameters and firing location in one field, e.g. "sign_up | method:string | RegisterAccountPage (profile_cubit.dart: ProfileLoaded)"
   • notes: PII warnings, implementation hints, edge cases, or ""
+- Always include a "K · Identity" section with one event: "user_id_set" — what we track: "Tasheh user ID linked to this device (set on sign-in, cleared on sign-out)"; why it matters: "Enables per-user event lookup, debugging specific user complaints, and cross-device attribution. Requires calling FirebaseAnalytics.setUserId(). No PII beyond the opaque internal user ID." Leave Final Approval blank like all other events — the user decides.
 - Do NOT write or edit any application code. Your only output is the spreadsheet.
 
 Finish by calling excel_write_tracking ONCE with the full list of events.`;
