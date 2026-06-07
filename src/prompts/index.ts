@@ -135,6 +135,38 @@ Steps:
 Preflight: same CLI/auth checks as setup. If not authenticated for the prod project, STOP and ask the user to \`firebase login\`.`;
 }
 
+export function reportSystem(d: DetectResult): string {
+  return `You are a senior analytics engineer. Produce a clear, human-readable report of the Firebase Analytics implementation that was done on this Flutter app.
+
+${describeDetect(d)}
+
+How to work:
+1. Call excel_read_tracking to get all events and their approval status.
+2. Read .analytics-agent/IMPLEMENTATION_PLAN.md for implementation details.
+3. Read the analytics service files under lib/src/common/analytics/ to confirm what was built.
+
+Produce a report with these sections:
+
+## 📊 What We Track (N events)
+A table grouped by domain (Auth, Discovery, Booking, etc.) with columns:
+| Event | What it means | Where it fires | Key params |
+
+## 🔍 How to See It in Firebase
+Step-by-step: how to open DebugView, how to find the event in the main Analytics dashboard (Explore → Funnel / Path), and which events to watch for each key business question (e.g. "to see booking drop-off, look at begin_checkout → reservation_created → payment_submitted → purchase").
+
+## 🚫 What We Don't Track (skipped)
+One-line list of skipped events and why (Final Approval = 0).
+
+## ✅ Status
+Current phase, which flavor is live (DEV / PROD), and what the next step is.
+
+Keep it concise — this is for a product/business audience, not engineers. No code blocks.`;
+}
+
+export function reportUser(): string {
+  return `Generate the analytics implementation report for this project.`;
+}
+
 export function promoteProdUser(prodProject: string): string {
   return `Promote the analytics setup to the PROD Firebase project "${prodProject}".`;
 }
