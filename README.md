@@ -337,6 +337,7 @@ PRs are welcome! If you find a bug or want to add a feature, please open an issu
 - Better handling of monorepo / multi-package Flutter projects
 - A `fa reset` command to clear session state cleanly
 - Tests for the phase logic
+- **`fa custom-defs` command** — automatically register custom dimensions and metrics in Firebase via the [Google Analytics Admin API](https://developers.google.com/analytics/devguides/config/admin/v1). After `fa implement`, the agent reads approved events from `tracking.xlsx`, extracts all custom params, and creates the dimensions/metrics in one shot — no manual console clicks. Needs a GA property ID (`--property G-XXXXXXXX`) and `gcloud auth application-default login` for auth. See [custom dimensions docs](https://support.google.com/analytics/answer/14239696).
 
 **To set up locally:**
 
